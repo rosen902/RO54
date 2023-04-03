@@ -74,7 +74,7 @@ class MarkoffModelWindow(Tk):
         self.top_frame.grid_columnconfigure(0, weight=1)
         self.text_widget = Text(self.state_frame)
         self.text_widget.pack()
-        new_text = "Nouveau texte"
+        new_text = "Veuillez choisir l'état initial"
         self.text_widget.delete("1.0", "end")
         self.text_widget.insert("1.0", new_text)
 
@@ -86,15 +86,15 @@ class MarkoffModelWindow(Tk):
         
         self.tabMarkoff = tabMarkoff
         self.index = 0
-        btn1 = Button(self.buttons_frame ,text="State 0",command= self.actionState0, bg="gray")
+        btn1 = Button(self.buttons_frame ,text="Etage 0",command= self.actionState0, bg="gray")
         btn1.pack(side = LEFT,fill="x", expand=True)
-        btn2 = Button(self.buttons_frame, text="State 1", command= self.actionState1, bg="gray")
+        btn2 = Button(self.buttons_frame, text="Etage 1", command= self.actionState1, bg="gray")
         btn2.pack(side = LEFT,fill="x", expand=True)
-        btn3 = Button(self.buttons_frame, text="State 2",command= self.actionState2, bg="gray")
+        btn3 = Button(self.buttons_frame, text="Etage 2",command= self.actionState2, bg="gray")
         btn3.pack(side = LEFT,fill="x", expand=True)
-        btn4 = Button(self.buttons_frame, text="State 3",command= self.actionState3, bg="gray")
+        btn4 = Button(self.buttons_frame, text="Etage 3",command= self.actionState3, bg="gray")
         btn4.pack(side = LEFT,fill="x", expand=True)
-        btn5 = Button(self.buttons_frame, text="State 4",command= self.actionState4, bg="gray")
+        btn5 = Button(self.buttons_frame, text="Etage 4",command= self.actionState4, bg="gray")
         btn5.pack(side = LEFT,fill="x", expand=True)
     def actionState0(self):
         self.upadteInterface(0)
@@ -112,7 +112,7 @@ class MarkoffModelWindow(Tk):
         self.upadteInterface(4) 
 
     def updateText(self,index: int):
-        new_text = "Etage actuel : " + str(self.tabMarkoff.previous_floor) + " | Veuillez sélectionner l'étage de destination ( entre 0 et 4 ) "
+        new_text = "Vous venez de l'étage : " + str(self.tabMarkoff.previous_floor) + " | Veuillez sélectionner l'étage de destination en cliquant sur le bouton correspondant ci-dessous ( entre 0 et 4 ) "
         tab_updated = self.tabMarkoff.getTabText()
         self.text_widget.delete("1.0", "end")
         self.text_widget.insert("1.0", new_text)
