@@ -7,7 +7,7 @@ from tkinter import *
 class State :
     def __init__ (self):
         self.useGlobale = 0
-    def addUse(self, index : int ,cells : [[]]):
+    def addUse(self, index : int ,cells):
         self.useGlobale += 1
         for i in cells[index]:
             i.proba = i.use / self.useGlobale
@@ -27,12 +27,12 @@ class Cell:
     def addUse(self):
         self.use += 1
 
-    def setProba(self, useGlobal) :
+    def setProba(self, proba) :
         self.proba = proba
 
 
 class TabMarkoff :
-    def __init__(self,tab : [[]], states : []):
+    def __init__(self,tab , states):
         self.tab = tab
         self.states = states
         self.previous_floor = 0
@@ -57,33 +57,34 @@ class MarkoffModelWindow(Tk):
         super().__init__(screenName, baseName, className, useTk, sync, use)
 
         self.geometry("600x400")
-        self.top_frame = Frame(self,bg='yellow')
-        self.bottom_frame = Frame(self,bg='pink')
+        self.top_frame = Frame(self,bg='gray')
+        self.bottom_frame = Frame(self,bg='gray')
         self.top_frame.grid(row=0, column=0, sticky="nsew")
         self.bottom_frame.grid(row=1, column=0, sticky="nsew")
         self.grid_rowconfigure(0, weight=2, uniform="group1")
         self.grid_rowconfigure(1, weight=8, uniform="group1")
         self.grid_columnconfigure(0, weight=1)
 
-        self.state_frame = Frame(self.top_frame, bg='yellow')
-        self.buttons_frame = Frame(self.top_frame, bg='brown')
+        self.state_frame = Frame(self.top_frame, bg='gray')
+        self.buttons_frame = Frame(self.top_frame, bg='gray')
+
         self.state_frame.grid(row=0, column=0, sticky="nsew")
         self.buttons_frame.grid(row=1, column=0, sticky="nsew")
+
         self.top_frame.grid_rowconfigure(0, weight=1, uniform="group1")
         self.top_frame.grid_rowconfigure(1, weight=1, uniform="group1")
         self.top_frame.grid_columnconfigure(0, weight=1)
+
         self.text_widget = Text(self.state_frame)
         self.text_widget.pack()
-        new_text = "Veuillez choisir l'état initial"
-        self.text_widget.delete("1.0", "end")
-        self.text_widget.insert("1.0", new_text)
+        self.text_widget.delete("1.0", "End")
+        self.text_widget.insert("1.0", "Veuillez choisir l'état initial")
 
         self.tab_text = Text(self.bottom_frame)
         self.tab_text.pack()
 
 
-    def setTabMarkoff(self,tabMarkoff : TabMarkoff):
-        
+    def setTabMarkoff(self,tabMarkoff : TabMarkoff): 
         self.tabMarkoff = tabMarkoff
         self.index = 0
         btn1 = Button(self.buttons_frame ,text="Etage 0",command= self.actionState0, bg="gray")
@@ -133,6 +134,8 @@ states = [State() for i in range(5)]
 new = MarkoffModelWindow()
 new.setTabMarkoff(TabMarkoff(tab,states))
 new.mainloop()
+
+
 # Boucle principale pour les déplacements de l'utilisateur
 """while True:
     # Demander à l'utilisateur de choisir son prochain étage de destination
