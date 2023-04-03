@@ -33,21 +33,20 @@ states = [State() for i in range(5)]
 previous_floor = 0
 turn = 0
 # Boucle principale pour les déplacements de l'utilisateur
-while turn < 100 :
+while True:
     # Demander à l'utilisateur de choisir son prochain étage de destination
-    #destination = int(input("Etage actuel : " , previous_floor , "Entrez l'étage de destination (0-4) : "))
-    destination = random.randint(0,4)
+    destination = int(input("Etage actuel : " , previous_floor , "Entrez l'étage de destination (0-4) : "))
+    
     # Mettre à jour la matrice de transition
     if previous_floor is not None:
         tab[previous_floor][destination].addUse()
         states[previous_floor].addUse(previous_floor,tab)
 
+
+    j = 0
+    for i in tab :
+        print("")
+        print( "state etage", j , ": ", i)
+        j += 1
     
     previous_floor = destination
-    turn += 1
-
-j = 0
-for i in tab :
-    print("")
-    print( "state etage", j , ": ", i)
-    j += 1
