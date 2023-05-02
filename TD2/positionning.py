@@ -21,6 +21,7 @@ class RSSISample:
 
 
 
+
 class FingerprintSample:
 	def __init__(self, samples: list[RSSISample]) -> None:
 		self.samples = samples
@@ -69,6 +70,30 @@ class Fingerprint:
 		self.position = position
 		self.sample = sample
 
+	def rssi_distance(self, second_sample : FingerprintSample) -> float :
+		pass
+	
+	def simple_matching(self, db: FingerprintDatabase) -> SimpleLocation :
+		pass
+
+
+class NormHisto :
+	def __inti__(self, histo : dict[int, float ]) :
+		self.histogram = histo
+
+	def probability(self, histo2 : NormHisto) -> float :
+		pass
+
+	def histogram_matching(self,db : FingerprintDatabase) -> float : 
+		pass
+
+class GaussModel :
+	def __init__(self,avg :float, stddev  : float):
+		self.average_rssi = avg
+		self.standard_deviation = stddev
+
+	def histogram_from_gauss(self) -> RSSISample :
+		pass
 
 class FingerprintDatabase:
 	def __init__(self) -> None:
