@@ -19,6 +19,14 @@ class RSSISample:
             sum += self.convert_to_mw(value)
         result = sum / len(self.rssi)
         return self.convert_to_dbm(result)
+    
+    def rssi_distance(self, second_sample: RSSISample) -> float:
+        return abs(self.get_average_rssi - second_sample.get_average_rssi)
+        pass
+
+    def simple_matching(self, db: FingerprintDatabase) -> SimpleLocation:
+
+        pass
 
 
 class FingerprintSample:
@@ -67,14 +75,7 @@ class Fingerprint:
     def __init__(self, position: SimpleLocation, sample: FingerprintSample) -> None:
         self.position = position
         self.sample = sample
-
-        def rssi_distance(self, second_sample: FingerprintSample) -> float:
-            pass
-
-        def simple_matching(self, db: FingerprintDatabase) -> SimpleLocation:
-            pass
-
-
+        
 class NormHisto:
     def __inti__(self, histo: dict[int, float]):
         self.histogram = histo
