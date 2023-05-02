@@ -1,4 +1,4 @@
-from math import log10, pow
+from math import log10, pow, pi
 import csv
 
 class RSSISample:
@@ -124,3 +124,27 @@ class FingerprintDatabase:
 				couples = fingerprint.sample.get_all_couples()
 				line = position + direction + couples
 				writer.writerow(line)
+
+	def get_rssi_sample_by_mac(mac: str):
+		pass
+
+
+class AccessPoint:
+	def __init__(self, mac : str, loc : SimpleLocation = SimpleLocation(0,0,0), f : float = 2417000000, a : float = 5.0, p : float = 20.0):
+		self.mac = mac
+		self.mac_address = mac
+		self.location = loc
+		self.output_power_dbm = p
+		self.antenna_dbi = a
+		self.output_frequency_hz = f
+		pass
+
+
+AP = {"00:13:ce:95:e1:6f": AccessPoint("00:13:ce:95:e1:6f", SimpleLocation(4.93, 25.81, 3.55), 2417000000, 5.0, 20.0),
+      "00:13:ce:95:de:7e": AccessPoint("00:13:ce:95:de:7e", SimpleLocation(4.83, 10.88, 3.78), 2417000000, 5.0, 20.0),
+      "00:13:ce:97:78:79": AccessPoint("00:13:ce:97:78:79", SimpleLocation(20.05, 28.31, 3.74), 2417000000, 5.0, 20.0),
+      "00:13:ce:8f:77:43": AccessPoint("00:13:ce:8f:77:43", SimpleLocation(4.13, 7.085, 0.80), 2417000000, 5.0, 20.0),
+      "00:13:ce:8f:78:d9": AccessPoint("00:13:ce:8f:78:d9", SimpleLocation(5.74, 30.35, 2.04), 2417000000, 5.0, 20.0)}
+
+def compute_FBCM_index(distance: float, rssi_values: RSSISample, ap: AccessPoint) -> float:
+	return (10 * log10(2.1 * ap.antenna_dbi) + 10 * log10(ap.output_power_dbm) + 20 * log10(ap.output_frequency_hz/4*pi) - log10())/(10 * log10(distance))
