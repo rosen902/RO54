@@ -1,5 +1,6 @@
 from math import log10, pow, pi
 import csv
+import itertools
 
 
 class RSSISample:
@@ -173,12 +174,12 @@ class AccessPoint:
 
 def compute_FBCM_index(distance: float, rssi_values: RSSISample, ap: AccessPoint) -> float:
     """
-Function compute_FBCM_index computes a FBCM index based on the distance (between transmitter and receiver)
-and the AP parameters. We consider the mobile device's antenna gain is 2.1 dBi.
-:param distance: the distance between AP and device
-:param rssi_values: the RSSI values associated to the AP for current calibration point. Use their average value.
-:return: one value for the FBCM index
-"""
+    Function compute_FBCM_index computes a FBCM index based on the distance (between transmitter and receiver)
+    and the AP parameters. We consider the mobile device's antenna gain is 2.1 dBi.
+    :param distance: the distance between AP and device
+    :param rssi_values: the RSSI values associated to the AP for current calibration point. Use their average value.
+    :return: one value for the FBCM index
+    """
     GR = 2.1
     GT = ap.antenna_dbi
     PR = RSSISample.get_average_rssi()
@@ -215,6 +216,23 @@ def estimate_distance(rssi_avg: float, fbcm_index: float, ap: AccessPoint) -> fl
     estimated_dist = pow(10, (PT-PR+GT+GR+20*log10(l/(4*pi)))/(10*fbcm_index))
     return estimated_dist
 
+def multilateration(distances: dict[str, float], ap_locations: dict[str, SimpleLocation]) -> SimpleLocation:
+    """
+    Function multilateration computes a location based on its distances towards at least 3 access points
+    :param distances: the distances associated to the related AP MAC addresses as a string
+    :param ap_locations: the access points locations, indexed by AP MAC address as strings
+    :return: a location
+    """
+    Num_AP = len(distances)
+    maximum_dist = max(distances)+1
+
+    min_x = int(min([loc.x for loc in ap_locations]) - maximum_dist)
+    min_y = int(min([loc.y for loc in ap_locations]) - maximum_dist)
+    min_z = int(min([loc.z for loc in ap_locations]) - maximum_dist)
+    max_x = int(max([loc.x for loc in ap_locations]) + maximum_dist)
+    max_y = int(max([loc.y for loc in ap_locations]) + maximum_dist)
+    max_z = int(max([loc.z for loc in ap_locations]) + maximum_dist)
+    
 
 if __name__ == "__main__":
     AP = {"00:13:ce:95:e1:6f": AccessPoint("00:13:ce:95:e1:6f", SimpleLocation(4.93, 25.81, 3.55), 2417000000, 5.0, 20.0),
