@@ -26,8 +26,16 @@ class RSSISample:
         pass
 
     def simple_matching(self, db: FingerprintDatabase) -> SimpleLocation:
+        for fingerprint in FingerprintDatabase.db:
+            dis_list = []
+            for RSSISample in fingerprint :
+                dis_rssi = []
+                if RSSISample.mac_adresse == self.mac_address:
+                    dis_rssi.append(self.rssi_distance(RSSISample))
+            dis_list.append(sum(dis_rssi)/len(dis_rssi))
 
-        pass
+        min_dist = min(dis_list)
+        return fingerprint[dis_list.index(min_dist)]
 
 
 class FingerprintSample:
@@ -85,6 +93,7 @@ class NormHisto:
         pass
 
     def histogram_matching(self, db: FingerprintDatabase) -> float:
+
         pass
 
 
@@ -233,12 +242,35 @@ def multilateration(distances: dict[str, float], ap_locations: dict[str, SimpleL
     max_x = int(max([loc.x for loc in ap_locations]) + maximum_dist)
     max_y = int(max([loc.y for loc in ap_locations]) + maximum_dist)
     max_z = int(max([loc.z for loc in ap_locations]) + maximum_dist)
+
+
     
 
-def calculate_FBCM ():
+def calculate_FBCM (AP_list, fingerprint_list):
+
+    index_list = []
+
+    for AP in AP_list:
+        for fingerprint_n in fingerprint_list:
+            for RSSI in RSSI_list:
+                if RSSI.mac_adresse == AP.mac_adresse:
+
+            """
+            check le bon mac_adresse
+            """
+
+
+
+
+
+
     """
     Pour chaque AP, on calcule un index FBCM à partir de la moyenne des index pour chaque RSSISample
+
+    On obtiens ainsi une liste d'index pour chaque AP.
     """
+
+
 
 
 
@@ -253,3 +285,9 @@ if __name__ == "__main__":
 	db = FingerprintDatabase()
 	db.load_data("data.csv")
 	db.generate_result_file()
+
+"""
+Pour chaque APs, on calcule la distance moyenne de  l'ensemble des distance pour chaque RSSIValue
+
+Puis ensuite, on calcule la location à partir de cette liste de distance
+"""
