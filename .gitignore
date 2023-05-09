@@ -1,2 +1,8 @@
 /.venv
 /.vscode
+/.idea/.gitignore
+/.idea/jpa-buddy.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/RO54.iml
+/.idea/vcs.xml
