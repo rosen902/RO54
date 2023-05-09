@@ -235,6 +235,14 @@ def multilateration(distances: dict[str, float], ap_locations: dict[str, SimpleL
     max_z = int(max([loc.z for loc in ap_locations]) + maximum_dist)
     
 
+def calculate_FBCM ():
+    """
+    Pour chaque AP, on calcule un index FBCM à partir de la moyenne des index pour chaque RSSISample
+    """
+
+
+
+
 AP = [AccessPoint("00:13:ce:95:e1:6f", SimpleLocation(4.93, 25.81, 3.55), 2417000000, 5.0, 20.0),
       AccessPoint("00:13:ce:95:de:7e", SimpleLocation(4.83, 10.88, 3.78), 2417000000, 5.0, 20.0),
       AccessPoint("00:13:ce:97:78:79", SimpleLocation(20.05, 28.31, 3.74), 2417000000, 5.0, 20.0),
