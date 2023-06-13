@@ -1,6 +1,11 @@
-from math import log10, pow, pi
+from math import log10, pow, pi , sqrt, floor ,exp
 import csv
 import itertools
+from histoMatching import HistoValue, NormHisto, FingerPrintNormalized
+from simpleMatching import AverageRSSI,FingerPrintAverage
+from gaussMatching import GaussModel,FingerPrintGaussed
+import numpy as np
+from GNSS_FBCM import AccessPoint,GNSS_systems
 
 
 class RSSISample:
@@ -20,23 +25,6 @@ class RSSISample:
             sum += self.convert_to_mw(value)
         result = sum / len(self.rssi)
         return self.convert_to_dbm(result)
-    
-    def rssi_distance(self, second_sample: RSSISample) -> float:
-        return abs(self.get_average_rssi - second_sample.get_average_rssi)
-        pass
-
-    def simple_matching(self, db: FingerprintDatabase) -> SimpleLocation:
-        for fingerprint in FingerprintDatabase.db:
-            dis_list = []
-            for RSSISample in fingerprint :
-                dis_rssi = []
-                if RSSISample.mac_adresse == self.mac_address:
-                    dis_rssi.append(self.rssi_distance(RSSISample))
-            dis_list.append(sum(dis_rssi)/len(dis_rssi))
-
-        min_dist = min(dis_list)
-        return fingerprint[dis_list.index(min_dist)]
-
 
 class FingerprintSample:
     def __init__(self, samples: list[RSSISample]) -> None:
@@ -64,11 +52,10 @@ class FingerprintSample:
             couples.append(round(sample.get_average_rssi(), 2))
         return couples
 
-
 class SimpleLocation:
     def __init__(self, x: float, y: float, z: float) -> None:
         self.x = x
-        self.y = y
+        self.y = y 
         self.z = z
 
     def __eq__(self, __o: object) -> bool:
@@ -78,37 +65,23 @@ class SimpleLocation:
 
     def get_as_list(self):
         return [self.x, self.y, self.z]
+    
+    def distance(self,position2):
+        dist = sqrt(pow(self.x-position2.x, 2) + pow(self.y-position2.y, 2) + pow(self.z-position2.z, 2))
+        return dist
 
 
 class Fingerprint:
     def __init__(self, position: SimpleLocation, sample: FingerprintSample) -> None:
         self.position = position
         self.sample = sample
-        
-class NormHisto:
-    def __inti__(self, histo: dict[int, float]):
-        self.histogram = histo
-
-    def probability(self, histo2: NormHisto) -> float:
-        pass
-
-    def histogram_matching(self, db: FingerprintDatabase) -> float:
-
-        pass
-
-
-class GaussModel:
-    def __init__(self, avg: float, stddev: float):
-        self.average_rssi = avg
-        self.standard_deviation = stddev
-
-    def histogram_from_gauss(self) -> RSSISample:
-        pass
 
 
 class FingerprintDatabase:
     def __init__(self) -> None:
         self.db = []
+        self.average_rssi_db = []
+
 
     def _is_location_known(self, location: SimpleLocation):
         if len(self.db) == 0:
@@ -170,107 +143,14 @@ class FingerprintDatabase:
     def get_rssi_sample_by_mac(mac: str):
         pass
 
-
-class AccessPoint:
-    def __init__(self, mac: str, loc: SimpleLocation = SimpleLocation(0, 0, 0), f: float = 2417000000, a: float = 5.0, p: float = 20.0):
-        self.mac = mac
-        self.mac_address = mac
-        self.location = loc
-        self.output_power_dbm = p
-        self.antenna_dbi = a
-        self.output_frequency_hz = f
-        pass
-
-
-def compute_FBCM_index(distance: float, rssi_values: RSSISample, ap: AccessPoint) -> float:
-    """
-    Function compute_FBCM_index computes a FBCM index based on the distance (between transmitter and receiver)
-    and the AP parameters. We consider the mobile device's antenna gain is 2.1 dBi.
-    :param distance: the distance between AP and device
-    :param rssi_values: the RSSI values associated to the AP for current calibration point. Use their average value.
-    :return: one value for the FBCM index
-    """
-    GR = 2.1
-    GT = ap.antenna_dbi
-    PR = RSSISample.get_average_rssi()
-    PT = ap.output_power_dbm
-    c = 299792458
-    l = c/ap.output_frequency_hz
-    l4pi = pow((l/(4*pi)), 2)
-    distance = abs(distance)
-
-    if distance == 0:
-        distance = 0.00001
-
-    index = (PT-PR+GT+GR+20*log10(l/(4*pi), 10)) / (10*log10(distance))
-    return index
-
-
-def estimate_distance(rssi_avg: float, fbcm_index: float, ap: AccessPoint) -> float:
-    """
-    Function estimate_distance estimates the distance between an access point and a test point based on
-    the test point rssi sample.
-    :param rssi: average RSSI value for test point
-    :param fbcm_index: index to use
-    :param ap: access points parameters used in FBCM
-    :return: the distance (meters)
-    """
-    GR = (2.1)
-    GT = (ap.antenna_dbi)
-    PR = (rssi_avg)
-    PT = (ap.output_power_dbm)
-    c = 299792458
-    l = c/ap.output_frequency_hz
-    l4pi = pow((l/(4 * pi)), 2)
-
-    estimated_dist = pow(10, (PT-PR+GT+GR+20*log10(l/(4*pi)))/(10*fbcm_index))
-    return estimated_dist
-
-def multilateration(distances: dict[str, float], ap_locations: dict[str, SimpleLocation]) -> SimpleLocation:
-    """
-    Function multilateration computes a location based on its distances towards at least 3 access points
-    :param distances: the distances associated to the related AP MAC addresses as a string
-    :param ap_locations: the access points locations, indexed by AP MAC address as strings
-    :return: a location
-    """
-    Num_AP = len(distances)
-    maximum_dist = max(distances)+1
-
-    min_x = int(min([loc.x for loc in ap_locations]) - maximum_dist)
-    min_y = int(min([loc.y for loc in ap_locations]) - maximum_dist)
-    min_z = int(min([loc.z for loc in ap_locations]) - maximum_dist)
-    max_x = int(max([loc.x for loc in ap_locations]) + maximum_dist)
-    max_y = int(max([loc.y for loc in ap_locations]) + maximum_dist)
-    max_z = int(max([loc.z for loc in ap_locations]) + maximum_dist)
-
-
-    
-
-def calculate_FBCM (AP_list, fingerprint_list):
-
-    index_list = []
-
-    for AP in AP_list:
-        for fingerprint_n in fingerprint_list:
-            for RSSI in RSSI_list:
-                if RSSI.mac_adresse == AP.mac_adresse:
-
-            """
-            check le bon mac_adresse
-            """
-
-
-
-
-
-
-    """
-    Pour chaque AP, on calcule un index FBCM à partir de la moyenne des index pour chaque RSSISample
-
-    On obtiens ainsi une liste d'index pour chaque AP.
-    """
-
-
+    def get_db_average_RSSI(self):
+        if len(self.db) > 0:
+            print("in self.db")
+            for fingerprint in self.db:
+                average_rssi = []
+                for sample in fingerprint.sample.samples:
+                    average_rssi.append(AverageRSSI(sample.mac_address,round(sample.get_average_rssi(), 2)))
+                self.average_rssi_db.append(FingerPrintAverage(fingerprint.position,average_rssi))
 
 
 
@@ -280,11 +160,17 @@ AP = [AccessPoint("00:13:ce:95:e1:6f", SimpleLocation(4.93, 25.81, 3.55), 241700
       AccessPoint("00:13:ce:97:78:79", SimpleLocation(20.05, 28.31, 3.74), 2417000000, 5.0, 20.0),
       AccessPoint("00:13:ce:8f:77:43", SimpleLocation(4.13, 7.085, 0.80), 2417000000, 5.0, 20.0),
       AccessPoint("00:13:ce:8f:78:d9", SimpleLocation(5.74, 30.35, 2.04), 2417000000, 5.0, 20.0)]
-   
+
+AP_calibrate =[]
+
 if __name__ == "__main__":
-	db = FingerprintDatabase()
-	db.load_data("data.csv")
-	db.generate_result_file()
+    db = FingerprintDatabase()
+    db.load_data("data.csv")
+    db.get_db_average_RSSI()
+    print(db.db[0].position)
+    for rssi in db.db[0].sample.samples:
+        print(rssi.mac_address)
+        print(rssi.rssi)
 
 """
 Pour chaque APs, on calcule la distance moyenne de  l'ensemble des distance pour chaque RSSIValue
